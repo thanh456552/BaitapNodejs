@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hệ Thống Quản Lý Lịch Đặt Chỗ</title>
+  <style>
+    /* Resetting some basic styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* Styling the body */
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f4f7fc;
+      color: #333;
+    }
+
+    /* Main container */
+    .container {
+      width: 90%;
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 30px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Header styles */
+    h1 {
+      text-align: center;
+      color: #e91e63; /* Pink color */
+      font-size: 2.8em;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      color: #f06292; /* Light pink color */
+      font-size: 1.8em;
+      margin-bottom: 20px;
+    }
+
+    /* Form styling */
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    label {
+      font-size: 1.1em;
+      color: #555;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    input[type="time"] {
+      padding: 12px;
+      font-size: 1.1em;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      outline: none;
+      transition: border-color 0.3s ease;
+    }
+
+    input[type="text"]:focus,
+    input[type="date"]:focus,
+    input[type="time"]:focus {
+      border-color: #e91e63; /* Pink focus color */
+    }
+
+    button {
+      background-color: #e91e63; /* Pink button */
+      color: white;
+      padding: 14px 25px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1.2em;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #d81b60; /* Darker pink on hover */
+    }
+
+    /* Table styling */
+    table {
+      width: 100%;
+      margin-top: 40px;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      padding: 15px;
+      text-align: left;
+      border-bottom: 2px solid #ddd;
+      font-size: 1.1em;
+    }
+
+    th {
+      background-color: #fce4ec; /* Light pink background */
+      color: #e91e63; /* Pink color */
+    }
+
+    .pending {
+      color: #ff9800; /* Orange for pending */
+    }
+
+    .confirmed {
+      color: #4caf50; /* Green for confirmed */
+    }
+
+    .cancelled {
+      color: #f44336; /* Red for cancelled */
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .edit-btn,
+    .cancel-btn,
+    .delete-btn {
+      padding: 8px 16px;
+      font-size: 1em;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .edit-btn {
+      background-color: #30c970;
+      color: white;
+    }
+
+    .cancel-btn {
+      background-color: #f44336;
+      color: white;
+    }
+
+    .delete-btn {
+      background-color: #e57373;
+      color: white;
+    }
+
+    .edit-btn:hover {
+      background-color: #2dfbc1;
+    }
+
+    .cancel-btn:hover {
+      background-color: #d32f2f;
+    }
+
+    .delete-btn:hover {
+      background-color: #d32f2f;
+    }
+
+    /* Hide the reservation list by default */
+    #reservation-list {
+      display: none;
+    }
+
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Hệ Thống Quản Lý Lịch Đặt Chỗ</h1>
+
+    <h2>Đặt Chỗ Mới</h2>
+    <form id="reservation-form">
+      <label for="customer-name">Tên Khách Hàng:</label>
+      <input type="text" id="customer-name" name="customer-name" required>
+
+      <label for="reservation-date">Ngày Sinh:</label>
+      <input type="date" id="reservation-date" name="reservation-date" required>
+
+      <label for="reservation-time">Thời Gian:</label>
+      <input type="time" id="reservation-time" name="reservation-time" required>
+
+      <button type="submit">Đặt Chỗ Mới</button>
+    </form>
+  </div>
+
+  <div class="container">
+    <h2>Danh Sách Đặt Chỗ</h2>
+    <button id="toggle-reservation-list" style="background-color: #e91e63; color: white; padding: 10px 20px; font-size: 1.2em; border-radius: 5px; cursor: pointer;">
+      Xem Danh Sách Đặt Chỗ
+    </button>
+
+    <div id="reservation-list">
+      <table id="reservation-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Tên Khách Hàng</th>
+            <th>Ngày</th>
+            <th>Thời Gian</th>
+            <th>Trạng Thái</th>
+            <th>Hành Động</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Data will be added dynamically here -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const reservations = [
+      { id: 2, customerName: 'H2', date: '2004-05-16', time: '14:30:00', status: 'Confirmed' },
+      { id: 3, customerName: 'H3', date: '2004-05-17', time: '18:45:00', status: 'Cancelled' }
+    ];
+
+    // Function to display reservations
+    function displayReservations() {
+      const tableBody = document.getElementById('reservation-table').getElementsByTagName('tbody')[0];
+      tableBody.innerHTML = ''; // Clear the table before adding data
+
+      reservations.forEach(reservation => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${reservation.id}</td>
+          <td>${reservation.customerName}</td>
+          <td>${reservation.date}</td>
+          <td>${reservation.time}</td>
+          <td class="${reservation.status.toLowerCase()}">${reservation.status}</td>
+          <td class="actions">
+            <button class="edit-btn">Chỉnh Sửa</button>
+            <button class="cancel-btn">Hủy</button>
+            <button class="delete-btn" onclick="deleteReservation(${reservation.id})">Xóa</button>
+          </td>
+        `;
+        tableBody.appendChild(row);
+      });
+    }
+
+    // Function to delete a reservation
+    function deleteReservation(id) {
+      const index = reservations.findIndex(reservation => reservation.id === id);
+      if (index !== -1) {
+        reservations.splice(index, 1);
+        displayReservations();
+      } else {
+        alert('Đặt chỗ không tồn tại!');
+      }
+    }
+
+    // Handle new reservation submission
+    document.getElementById('reservation-form').addEventListener('submit', (event) => {
+      event.preventDefault();
+      const customerName = document.getElementById('customer-name').value;
+      const reservationDate = document.getElementById('reservation-date').value;
+      const reservationTime = document.getElementById('reservation-time').value;
+
+      reservations.push({
+        id: reservations.length + 1,
+        customerName,
+        date: reservationDate,
+        time: reservationTime,
+        status: 'Pending'
+      });
+
+      document.getElementById('reservation-form').reset();
+      displayReservations();
+    });
+
+    // Toggle the visibility of the reservation list
+    document.getElementById('toggle-reservation-list').addEventListener('click', () => {
+      const reservationList = document.getElementById('reservation-list');
+      if (reservationList.style.display === 'none') {
+        reservationList.style.display = 'block';
+        document.getElementById('toggle-reservation-list').textContent = 'Ẩn Danh Sách Đặt Chỗ';
+      } else {
+        reservationList.style.display = 'none';
+        document.getElementById('toggle-reservation-list').textContent = 'Xem Danh Sách Đặt Chỗ';
+      }
+    });
+  </script>
+</body>
+
+</html>
